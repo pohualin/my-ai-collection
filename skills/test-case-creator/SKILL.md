@@ -1,8 +1,6 @@
 ---
 name: test-case-creator
-description: >
-  Generate unit test cases for Python, Java, and React projects. Use when asked to create, update, or improve test files, suggest test structure, or automate test writing for multiple languages.
-version: 1
+description: 'Generate comprehensive test cases for functions, classes, or modules. This skill analyzes code and produces a variety of test scenarios, including edge cases, to ensure robust test coverage.'
 ---
 
 # Purpose

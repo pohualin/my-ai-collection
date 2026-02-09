@@ -1,39 +1,66 @@
 ---
 name: skill-creator
-description: > 
-  Generate new Agent Skills from natural language descriptions. 
-  Create complete SKILL.md files with YAML frontmatter, instructions, 
-  and folder structure suggestions.
+description: Generate new Agent Skills from natural language descriptions. Create complete SKILL.md files with YAML frontmatter, instructions, and folder structure suggestions.
 ---
 
-# Purpose
-Create production-ready Copilot Agent Skills from workflow descriptions.
 
+# Agent Skill Format (per Agent Skills Specification)
 
-# Process
-1. **Parse request**: Extract skill name, trigger scenarios, key behaviors
-2. **Generate YAML**: `name`, `description` (precise matching criteria), `version: 1`
-3. **Write instructions**: Purpose, rules, examples, resources
-4. **Suggest structure**: `.github/skills/<kebab-name>/` + optional files
-   - Optionally include:
-     - `references/`: Documentation, specs, best practices, language instructions
-     - `assets/`: Static files (images, diagrams, sample data, templates)
-     - `scripts/`: Executable scripts for automation, setup, or workflow tasks
-5. **Validate**: Clear description, specific rules, no conflicts
+All Agent Skills must begin with YAML frontmatter, delimited by triple dashes (---) at the top and bottom. The required fields are:
+
+```
+---
+name: skill-name
+description: 'A description of what this skill does and when to use it.'
+---
+```
+
+**Required fields:**
+- `name`: 1–64 characters, lowercase letters/numbers/hyphens only, must match the folder name, no leading/trailing/consecutive hyphens.
+- `description`: 10–1024 characters, single line, single-quoted, clearly states what the skill does and when to use it.
+
+**Optional fields:**
+- `license`: License for the skill (e.g., MIT, Apache-2.0)
+- `compatibility`: Environment or product requirements
+- `metadata`: Arbitrary metadata for the skill
+- `allowed-tools`: List of tool names the skill is allowed to use
+
+**Validation rules:**
+- Do not use YAML block scalars (no `>` or multi-line for description)
+- Do not indent description or add extra attributes
+- Always surround frontmatter with ---
+- The name must match the folder, be lowercase, and use only allowed characters
+- The description must be single-quoted and on a single line
+
+For full details, see the [Agent Skills specification](https://agentskills.io/specification).
 
 # Skill Structure
-Each skill can have the following optional folders:
-- `references/`: For documentation, specs, and language-specific instructions
-- `assets/`: For static resources like images, diagrams, or sample data
-- `scripts/`: For executable scripts (shell, Python, etc.) to automate tasks or integrate workflows
+
+Each skill folder may include:
+- `SKILL.md` (required): With correct frontmatter and markdown instructions
+- `references/` (optional): Documentation, specs, best practices, language instructions
+- `assets/` (optional): Static files (images, diagrams, sample data, templates)
+- `scripts/` (optional): Executable scripts for automation, setup, or workflow tasks
 
 These folders help organize knowledge, resources, and automation for each skill.
 
-# Output Format
+# Output Format Example
+
+```
 ---
-name: wiki-writer
-description: Guides creating, updating, and formatting GitHub wiki pages. Use when asked to create wiki documentation, summarize code for wiki, generate markdown pages, or manage wiki structure.
+name: example-skill
+description: 'Describe what this skill does and when to use it.'
 ---
+
+# Purpose
+Explain the skill's purpose and when it should be triggered.
+
+# Instructions
+Provide step-by-step instructions, rules, and examples.
+
+# References
+List or link to any bundled resources, scripts, or documentation.
+```
 
 # AgentWi Skills for Wiki Pages Workspace
 The agent can assist with the following tasks:

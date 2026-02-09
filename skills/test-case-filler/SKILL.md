@@ -1,8 +1,6 @@
 ---
 name: test-case-filler
-description: >
-  Automatically identify code with less than 100% test coverage and generate targeted test cases to fill coverage gaps. Integrates with test-coverage-checker and test-case-creator.
-version: 1
+description: 'Automatically identify code with less than 100% test coverage and generate targeted test cases to fill coverage gaps. Integrates with test-coverage-checker and test-case-creator.'
 ---
 
 # Purpose
