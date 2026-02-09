@@ -38,6 +38,10 @@ The agent can assist with the following tasks:
 - Generate scripts for coverage reporting
 - Suggest CI/CD workflow snippets for coverage automation
 
+## Scripts
+
+- For language-specific instructions (including Java): see the references directory.
+
 # Example Usage
 - "Check test coverage for my Python module."
 - "Show me the HTML coverage report for my React app."
