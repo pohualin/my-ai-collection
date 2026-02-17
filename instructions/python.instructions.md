@@ -3,6 +3,20 @@ description: 'Python coding conventions and guidelines'
 applyTo: '**/*.py'
 ---
 
+# Python Coding Conventions & Best Practices
+
+## 1. Utility Reuse
+- Before creating any new utility functions or modules, always check the `python_util` library for existing solutions. Reuse and extend shared utilities whenever possible to ensure consistency and reduce duplication across scripts.
+
+## 2. Script Initialization
+- Always place `setup_logging()`, `logger = logging.getLogger(__name__)`, and `load_dotenv()` at the top level of your script, immediately after imports.
+    - This ensures logging and environment variables are configured before any other code runs.
+    - Prevents duplicate log messages and missing environment variables.
+- Only call `setup_logging()` in the main script, not in imported modules.
+- In modules that can be both imported and run directly, call `setup_logging()` inside `if __name__ == "__main__":`.
+- Never configure logging in library modules; let the main script handle it.
+- This approach is robust, avoids side effects, and is suitable for real-world, production-quality Python code.
+ 
 # Python Coding Conventions
 
 ## Python Instructions
