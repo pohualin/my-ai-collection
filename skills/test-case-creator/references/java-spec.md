@@ -43,6 +43,9 @@ Define strict requirements and best practices for generating production-ready Ja
     - This improves readability and makes test intent clear.
 
 ## Dependency Mocking and Test Setup Requirements
+- **If the class under test does not use constructor injection for its dependencies, refactor it to use constructor injection before writing or generating tests.**
+    - Constructor injection makes all dependencies explicit, improves testability, and avoids issues with field/setter injection or hidden dependencies.
+    - This ensures that all required dependencies can be easily mocked and injected in tests, and that the test setup matches the actual implementation.
 - Always read the full constructor and class implementation of the class under test.
 - Identify all required constructor arguments and their types.
 - Mock all required dependencies as per the constructor signature.
