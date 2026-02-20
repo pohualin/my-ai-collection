@@ -1,5 +1,17 @@
 # Java Test Specification
 
+## Table of Contents
+1. [Purpose](#purpose)
+2. [Supported Frameworks & Java Version](#supported-frameworks--java-version)
+3. [Test Framework Detection](#test-framework-detection)
+4. [Test Structure](#test-structure)
+5. [Dependency Mocking and Test Setup Requirements](#dependency-mocking-and-test-setup-requirements)
+6. [Best Practices](#best-practices)
+7. [Coverage & Testing Instructions](#coverage--testing-instructions)
+8. [Checklist for Every Method](#checklist-for-every-method)
+9. [Advanced Mockito Usage for Private/Protected Methods](#advanced-mockito-usage-for-privateprotected-methods)
+10. [Examples](#examples)
+
 ## Purpose
 Define strict requirements and best practices for generating production-ready Java unit and integration tests, ensuring high coverage and maintainability.
 
@@ -8,8 +20,8 @@ Define strict requirements and best practices for generating production-ready Ja
 - **Version:** Java 11 only (use only Java 11 features)
 - **Library Versions:**
   - JUnit: 4.x
-  - Maven Surefire: ≤ 3.0.0
-  - Jacoco: ≤ 0.8.11
+  - **Maven Surefire:** Use the latest Java 11 compatible version (currently 3.0.0-M9 or newer, but not requiring Java 17+)
+  - **JaCoCo:** Use the latest Java 11 compatible version (currently 0.8.11)
   - Avoid versions requiring Java 17+.
 
 ## Test Framework Detection
@@ -21,6 +33,27 @@ Define strict requirements and best practices for generating production-ready Ja
 - Test classes: Use `@Test` for each test method.
 - Use `@Before`/`@After` for setup/teardown.
 - Always import from the original class to avoid import errors.
+- **Follow the Arrange-Act-Assert (AAA) pattern in all test methods for clarity:**
+    - Arrange: Set up test data and mocks
+    - Act: Call the method under test
+    - Assert: Verify the result
+- **Test Method Naming Convention:**
+    - Use the pattern: `methodUnderTest_condition_expectedResult`
+    - Example: `add_twoPositiveNumbers_returnsSum`, `login_invalidPassword_throwsException`
+    - This improves readability and makes test intent clear.
+
+## Dependency Mocking and Test Setup Requirements
+- Always read the full constructor and class implementation of the class under test.
+- Identify all required constructor arguments and their types.
+- Mock all required dependencies as per the constructor signature.
+- Only stub/mock methods that are actually called by the method under test.
+- Ensure the test setup matches the actual implementation, preventing missing or extra mocks.
+- If the constructor changes, update the test setup accordingly.
+- Never assume a single dependency—always verify against the actual code.
+- **Declare all shared mocks for dependencies (e.g., services, repositories, APIs) as private class-level variables in the test class.**
+- **Initialize these shared mocks in the `@Before` (JUnit 4) or `@BeforeEach` (JUnit 5) setup method.**
+- **Always inject these mocks into the class under test when constructing it, to ensure the correct mock is used and to avoid issues with mock configuration or verification.**
+- **Avoid creating new mocks inside individual test methods unless the mock’s behavior must be unique to that test and cannot be shared.**
 
 ## Best Practices
 - Use assertions for validation.
@@ -41,12 +74,6 @@ Define strict requirements and best practices for generating production-ready Ja
 - Iterate until 95%+ coverage is achieved and all tests pass.
 - Fix all import and compatibility issues.
 
-## How to Use This Spec
-1. Detect frameworks and Java version.
-2. For each public method, use the checklist below to ensure all scenarios are tested.
-3. Run coverage tools and add tests for any uncovered code.
-4. Summarize coverage and justify any uncovered code.
-
 ## Checklist for Every Method
 - [ ] All public methods tested
 - [ ] All logical branches (if/else, switch, loops)
@@ -60,9 +87,9 @@ Define strict requirements and best practices for generating production-ready Ja
 - [ ] Summary of coverage and justification for any uncovered code
 
 ## Advanced Mockito Usage for Private/Protected Methods
-- If you must control the behavior of a private or protected method for testing, prefer refactoring it to package-private or protected.
-- Use Mockito.spy and doReturn()/doThrow() to stub package-private or protected methods in the class under test.
-- Avoid using PowerMock or reflection to access true private methods unless absolutely necessary, as it breaks encapsulation and maintainability.
+- **Do not attempt to mock, stub, or verify private methods.** Tests should trust that private methods work according to their current implementation.
+- If you must control the behavior of a protected or package-private method for testing, you may use Mockito.spy and doReturn()/doThrow() to stub those methods in the class under test.
+- Avoid using PowerMock or reflection to access private methods, as it breaks encapsulation and maintainability.
 - Example:
 ```java
 MyService spyService = spy(new MyService());
@@ -70,22 +97,50 @@ doReturn(mockedValue).when(spyService).packagePrivateOrProtectedMethod(args);
 ```
 - Always prefer testing private logic through public APIs. Only use spies for legacy or hard-to-refactor code.
 
+## When to Use Mocks vs Real Objects
+
+- **Use mocks** for dependencies (services, repositories, APIs, etc.) to control their behavior, simulate errors, or verify interactions. Mock when the real object is slow, has side effects, or is hard to set up.
+- **Use real objects** for simple data holders (POJOs/DTOs) and the unit under test. Use real objects when you need to ensure fields and getters/setters work as expected, or to avoid issues with mock behavior (e.g., unstubbed methods returning null).
+- **Rule of thumb:**
+    - Mock dependencies and collaborators.
+    - Use real objects for simple data classes and the class under test.
+
+**Example:**
+```java
+// Good: mock a service dependency
+MyService service = mock(MyService.class);
+when(service.doSomething()).thenReturn("result");
+
+// Good: use a real POJO for input data
+MyPojo pojo = new MyPojo();
+pojo.setField("value");
+
+// Good: use a real object for the class under test
+MyComponent component = new MyComponent(service);
+```
+
 ## Examples
 
-**Simple Unit Test**
+**Simple Unit Test (with Naming Convention)**
 ```java
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class CalculatorTest {
     @Test
-    public void testAdd() {
-        assertEquals(3, Calculator.add(1, 2));
+    public void add_twoPositiveNumbers_returnsSum() {
+        // Arrange
+        int a = 1;
+        int b = 2;
+        // Act
+        int result = Calculator.add(a, b);
+        // Assert
+        assertEquals(3, result);
     }
 }
 ```
 
-**Mockito Example**
+**Mockito Example (with Naming Convention)**
 ```java
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -93,11 +148,15 @@ import static org.junit.Assert.*;
 
 public class ServiceTest {
     @Test
-    public void testServiceUsesDependency() {
+    public void fetchValue_dependencyReturns42_returns42() {
+        // Arrange
         Dependency dep = Mockito.mock(Dependency.class);
         Mockito.when(dep.getValue()).thenReturn(42);
         Service service = new Service(dep);
-        assertEquals(42, service.fetchValue());
+        // Act
+        int value = service.fetchValue();
+        // Assert
+        assertEquals(42, value);
     }
 }
 ```
